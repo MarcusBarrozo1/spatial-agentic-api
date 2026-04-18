@@ -1,4 +1,4 @@
-# Spatial Agentic RAG: Credit Risk & Vision Automation
+# Spatial Agentic RAG: Computer Vision Applied to Credit Risk
 
 An enterprise-grade orchestration pipeline designed to automate agricultural credit risk analysis by bridging Large Language Models (LLMs) with Geospatial Computer Vision.
 
