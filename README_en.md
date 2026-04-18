@@ -1,0 +1,40 @@
+# Spatial Agentic RAG: Credit Risk & Vision Automation
+
+An enterprise-grade orchestration pipeline designed to automate agricultural credit risk analysis by bridging Large Language Models (LLMs) with Geospatial Computer Vision.
+
+## 🎯 The Vision
+Traditional AgTech workflows require manual intervention (QGIS, satellite imagery downloading, and visual inspections). This project implements an **Agentic Workflow**, where an LLM acts as the orchestrator, autonomously triggering Dockerized Computer Vision pipelines (Rasterio/NumPy) to segment farm parcels, calculate vegetative health (NDVI), and cross-reference spatial knowledge bases (Enterprise RAG).
+
+## 🏗️ Architecture Layers
+This system is designed in 4 distinct layers:
+- **Layer 1: Interface & API (Implemented)** - A FastAPI gateway that receives natural language intent or structured payloads.
+- **Layer 2: Vision Tools (Implemented)** - A Dockerized geospatial engine that handles heavy GIS operations (CRS reprojection, raster masking, tensor generation) without C++ dependency conflicts (GDAL/PROJ).
+- **Layer 3: The Brain (Roadmap)** - An LLM orchestrator (LangChain/LlamaIndex) utilizing Tool Calling to fetch data autonomously.
+- **Layer 4: Persistence (Roadmap)** - Hybrid memory using PostGIS (vector geometries) and ChromaDB (credit policy embeddings).
+
+## 🚀 Current MVP Features
+- [x] **Geospatial Data Ingestion:** Reads vector (`.shp`, `.geojson`) and raster (`.tif`) data seamlessly.
+- [x] **On-the-fly CRS Alignment:** Mathematically resolves coordinate system conflicts in-memory.
+- [x] **Tensor Extraction:** Crops, masks, and slices satellite imagery into `(256, 256, 1)` `float32` tensors, ready for Deep Learning (U-Net/Mask R-CNN) ingestion.
+- [x] **Agent-Ready API:** FastAPI endpoints with rigorous Pydantic schemas, ready to be consumed by LLM function calling.
+- [x] **Containerization:** Fully isolated in a `python:3.11-slim` Docker environment to ensure MLOps reproducibility.
+
+## 🛠️ Tech Stack
+**Backend:** Python 3.11, FastAPI, Uvicorn, Pydantic  
+**Geospatial & ML:** Rasterio, GeoPandas, NumPy  
+**DevOps:** Docker
+
+## ⚙️ How to Run Locally
+
+### 1. Build the MLOps Container
+```bash
+docker build -t spatial-agent-api .
+```
+
+### 2. Run the Server
+```bash
+docker run -p 8000:8000 spatial-agent-api
+```
+#### Access the interactive API documentation at http://localhost:8000/docs.
+
+
