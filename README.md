@@ -1,6 +1,6 @@
 *Read this in [English](README_en.md).*
 
-# Spatial Agentic RAG: Risco de Crédito e Automação de Visão
+# Spatial Agentic RAG: Visão Computacional Aplicada à Análise de Risco
 
 Um pipeline de orquestração de nível empresarial projetado para automatizar a análise de risco de crédito agrícola conectando Large Language Models (LLMs) com Visão Computacional Geoespacial.
 
