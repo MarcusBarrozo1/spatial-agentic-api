@@ -92,9 +92,9 @@ def run_training_pipeline():
     class_weights_list = [1.0, 50.0, 50.0] 
 
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-        loss=weighted_sparse_categorical_crossentropy(class_weights_list),
-        metrics=['accuracy']
+        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4),
+        loss = weighted_sparse_categorical_crossentropy(class_weights_list),
+        metrics = ['accuracy']
     )
 
     # 3. CONFIGURE CALLBACKS

@@ -48,10 +48,10 @@ def extract_training_tensors(raster_paths, vector_path, patch_size=256, class_co
     
     out_mask = rasterize(
         shapes,
-        out_shape=(height, width),
-        transform=out_transform,
-        fill=0,
-        dtype='uint8'
+        out_shape = (height, width),
+        transform = out_transform,
+        fill = 0,
+        dtype = 'uint8'
     )
     out_mask = np.expand_dims(out_mask, axis=0) # (1, H, W)
 
