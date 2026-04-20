@@ -10,6 +10,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
+import numpy as np
 import tensorflow as tf
 
 from data_loader import extract_training_tensors
@@ -41,20 +42,59 @@ def run_training_pipeline():
     X_train, Y_train = extract_training_tensors(
         raster_paths = RASTER_BANDS,
         vector_path = VECTOR_TRUTH, 
-        patch_size = PATCH_SIZE
+        patch_size = PATCH_SIZE,
+        class_column = 'category'
     )
 
     num_bands = X_train.shape[-1]
     input_shape = (PATCH_SIZE, PATCH_SIZE, num_bands)
 
+    # 1.5 SYNCHRONIZED DATA AUGMENTATION
+    print("[Trainer] Step 1.5: Applying Synchronized Data Augmentation...")
+    x_aug, y_aug = [], []
+    
+    for x_patch, y_patch in zip(X_train, Y_train):
+        # 1. Original
+        x_aug.append(x_patch)
+        y_aug.append(y_patch)
+        # 2. 90 degrees
+        x_aug.append(np.rot90(x_patch, 1, axes=(0, 1)))
+        y_aug.append(np.rot90(y_patch, 1, axes=(0, 1)))
+        # 3. 180 degrees
+        x_aug.append(np.rot90(x_patch, 2, axes=(0, 1)))
+        y_aug.append(np.rot90(y_patch, 2, axes=(0, 1)))
+        # 4. Flip Up-Down
+        x_aug.append(np.flipud(x_patch))
+        y_aug.append(np.flipud(y_patch))
+        
+    X_train = np.array(x_aug)
+    Y_train = np.array(y_aug)
+    print(f"[Trainer] Augmented dataset size: X={X_train.shape}, Y={Y_train.shape}")
+
+    def weighted_sparse_categorical_crossentropy(weights):
+        weights_tensor = tf.constant(weights, dtype=tf.float32)
+
+        def loss(y_true, y_pred):
+            base_loss = tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred)
+            
+            y_true_squeezed = tf.squeeze(tf.cast(y_true, tf.int32), axis=-1)
+            
+            pixel_weights = tf.gather(weights_tensor, y_true_squeezed)
+            
+            return base_loss * pixel_weights
+
+        return loss
+
     # 2. BUILD MODEL
-    print("[Trainer] Step 2: Building U-Net model with input shape {input_shape}...")
-    model = build_unet_architecture(input_shape = input_shape, num_classes=2)
+    print(f"[Trainer] Step 2: Building U-Net model with input shape {input_shape}...")
+    model = build_unet_architecture(input_shape=input_shape, num_classes=3)
+
+    class_weights_list = [1.0, 50.0, 50.0] 
 
     model.compile(
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4),
-        loss = 'sparse_categorical_crossentropy',
-        metrics = ['accuracy']
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+        loss=weighted_sparse_categorical_crossentropy(class_weights_list),
+        metrics=['accuracy']
     )
 
     # 3. CONFIGURE CALLBACKS
@@ -78,6 +118,7 @@ def run_training_pipeline():
 
     # 4. TRAINING
     print("[Trainer] Step 3: Starting training loop...")
+
     history = model.fit(
         x = X_train, 
         y = Y_train,

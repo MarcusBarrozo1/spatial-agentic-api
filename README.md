@@ -17,13 +17,17 @@ Este sistema é projetado em 4 camadas distintas:
 ## 🚀 Recursos Atuais do MVP
 - [x] **Ingestão de Dados Geoespaciais:** Lê dados vetoriais (`.shp`, `.geojson`) e raster (`.tif`) de forma integrada.
 - [x] **Alinhamento CRS em Tempo Real:** Resolve matematicamente conflitos de sistema de coordenadas na memória.
-- [x] **Extração de Tensores:** Corta, mascara e fatia imagens de satélite em tensores `(256, 256, 1)` `float32`, prontos para ingestão de Aprendizado Profundo (U-Net/Mask R-CNN).
-- [x] **Agent-Ready API:** Endpoints FastAPI com esquemas Pydantic, prontos para serem consumidos por chamada de função LLM.
-- [x] **Containerização:** Totalmente isolado em um ambiente Docker `python:3.11-slim` para garantir reprodutibilidade de MLOps.
+- [x] **Multi-Band Spatial ETL:** Ingestão e empilhamento (*stacking*) de múltiplas bandas espectrais do Sentinel-2 (ex: B2, B3, B4, B8) para análise espectral profunda.
+- [x] **Geração de Ground Truth:** Automação da conversão de polígonos (Shapefiles) em máscaras binárias georreferenciadas (`rasterize`).
+- [x] **Extração de Tensores:** Corta, mascara e fatia imagens de satélite em tensores sincronizados `(256, 256, Canais)` e `(256, 256, 1)`, prontos para ingestão.
+- [x] **Modelagem Deep Learning (U-Net):** Arquitetura semântica personalizada com *Bottleneck*, *Upsampling* (`Conv2DTranspose`) e *Skip Connections* para segmentação de precisão.
+- [x] **Orquestração MLOps:** Ciclo de treino automatizado com *EarlyStopping* e salvaguarda de *Model Checkpoints* (`.keras`).
+- [x] **Agent-Ready API:** Endpoints FastAPI com esquemas Pydantic, isolados em ambiente Docker (`python:3.11-slim`).
 
 ## 🛠️ Pilha Tecnológica
 **Backend:** Python 3.11, FastAPI, Uvicorn, Pydantic  
-**Geoespacial e ML:** Rasterio, GeoPandas, NumPy  
+**Geoespacial e ML:** Rasterio, GeoPandas, NumPy
+**Machine Learning:** TensorFlow, Keras, NumPy  
 **DevOps:** Docker
 
 ## ⚙️ Como Executar Localmente

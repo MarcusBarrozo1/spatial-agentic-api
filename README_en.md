@@ -15,13 +15,17 @@ This system is designed in 4 distinct layers:
 ## 🚀 Current MVP Features
 - [x] **Geospatial Data Ingestion:** Reads vector (`.shp`, `.geojson`) and raster (`.tif`) data seamlessly.
 - [x] **On-the-fly CRS Alignment:** Mathematically resolves coordinate system conflicts in-memory.
-- [x] **Tensor Extraction:** Crops, masks, and slices satellite imagery into `(256, 256, 1)` `float32` tensors, ready for Deep Learning (U-Net/Mask R-CNN) ingestion.
-- [x] **Agent-Ready API:** FastAPI endpoints with rigorous Pydantic schemas, ready to be consumed by LLM function calling.
-- [x] **Containerization:** Fully isolated in a `python:3.11-slim` Docker environment to ensure MLOps reproducibility.
+- [x] **Multi-Band Spatial ETL:** Stacking and ingestion of multiple spectral bands of Sentinel-2 for deep spectral analysis.
+- [x] **Ground Truth Generation:** Polygon conversion automation (Shapefiles) in georeferenced binary masks (`rasterize`).
+- [x] **Tensor Extraction:** Crops, masks, and slices satellite imagery in synchronized tensors `(256, 256, Channels)` and `(256, 256, 1)`, ready for ingestion.
+- [x] **Deep Learning Modelling(U-Net):** Personalized semantic architecture with *Bottleneck*, *Upsampling*, (`Conv2DTranspose`) and *Skip Connections* for precision segmentation.
+ - [x] **MLOps Orchestration:** Automatized trining cicle with *EarlyStopping* and saveguard of *Model Checkpoints* (`.keras`).
+- [x] **Agent-Ready API:** FastAPI endpoints with Pydantic schemas, isolated in Docker environment (`python:3.11-slim`).
 
 ## 🛠️ Tech Stack
 **Backend:** Python 3.11, FastAPI, Uvicorn, Pydantic  
-**Geospatial & ML:** Rasterio, GeoPandas, NumPy  
+**Geospatial & ML:** Rasterio, GeoPandas, NumPy
+**Machine Learning:** TensorFlow, Keras, NumPy    
 **DevOps:** Docker
 
 ## ⚙️ How to Run Locally
