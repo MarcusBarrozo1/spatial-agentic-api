@@ -14,6 +14,7 @@ import geopandas as gpd
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import tensorflow as tf
+import keras
 
 import sys
 
@@ -42,7 +43,18 @@ def run_inference(raster_bands, output_path, model_path=MODEL_PATH):
         return
         
     print("[Inference] Loading trained U-Net model...")
-    model = tf.keras.models.load_model(model_path, compile=False)
+
+    custom_objects = {
+        'Functional': tf.keras.Model
+    }
+
+    try:
+        with tf.keras.utils.custom_object_scope(custom_objects):
+            model = tf.keras.models.load_model(model_path, compile=False)
+        print("[Inference] Model loaded successfully with custom scope.")
+    except Exception as e:
+        print(f"[Inference] Failed to load model: {e}")
+        raise e
     
     print("[Inference] Extracting spatial data...")
         
@@ -105,6 +117,14 @@ def run_inference(raster_bands, output_path, model_path=MODEL_PATH):
     print(f"[Inference] Análise Agronômica: NDVI Médio dos Pivôs = {mean_ndvi:.3f}")
 
     print(f"[Inference] Saving prediction to {output_path}...")
+    
+    if os.path.exists(output_path):
+        try:
+            os.remove(output_path)
+            print("[Inference] Arquivo antigo removido para sobrescrita.")
+        except PermissionError:
+            print("[Inference] Aviso: Falha de permissão ao remover. Tentando sobrescrever diretamente...")
+        
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
     out_meta.update({
