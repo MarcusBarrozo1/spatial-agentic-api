@@ -26,22 +26,22 @@ NEW_RASTER_BANDS = [
 OUTPUT_TIFF = 'predictions/predicted_mask.tif'
 PATCH_SIZE = 256
 
-def run_inference():
+def run_inference(raster_bands, output_path, model_path=MODEL_PATH):
     print("[Inference] Starting inference pipeline...")
     
-    if not os.path.exists(MODEL_PATH):
-        print(f"[FATAL ERROR] Model not found at {MODEL_PATH}")
+    if not os.path.exists(model_path):
+        print(f"[FATAL ERROR] Model not found at {model_path}")
         return
         
     print("[Inference] Loading trained U-Net model...")
-    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+    model = tf.keras.models.load_model(model_path, compile=False)
     
     print("[Inference] Extracting spatial data...")
         
     cropped_bands = []
     out_meta = None
 
-    for idx, path in enumerate(NEW_RASTER_BANDS):
+    for idx, path in enumerate(raster_bands):
         with rio.open(path) as src:
             img = src.read(1) # Lê a banda inteira
             cropped_bands.append(img)
@@ -86,8 +86,8 @@ def run_inference():
     # --- 5. CROPPING ---
     final_mask = reconstructed_mask[:original_h, :original_w] # Retorna para 678x643
 
-    print(f"[Inference] Saving prediction to {OUTPUT_TIFF}...")
-    os.makedirs(os.path.dirname(OUTPUT_TIFF), exist_ok=True)
+    print(f"[Inference] Saving prediction to {output_path}...")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
     out_meta.update({
         "driver": "GTiff",
@@ -97,10 +97,12 @@ def run_inference():
         "dtype": 'uint8'
     })
 
-    with rio.open(OUTPUT_TIFF, "w", **out_meta) as dest:
+    with rio.open(output_path, "w", **out_meta) as dest:
         dest.write(final_mask, 1)
 
     print("[Inference] Pipeline completed successfully!")
+
+    return output_path
 
 if __name__ == "__main__":
     run_inference()

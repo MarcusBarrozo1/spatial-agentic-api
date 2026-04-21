@@ -7,8 +7,15 @@ Traditional AgTech workflows require manual intervention (QGIS, satellite imager
 
 ## 🏗️ Architecture Layers
 This system is designed in 4 distinct layers:
-- **Layer 1: Interface & API (Implemented)** - A FastAPI gateway that receives natural language intent or structured payloads.
-- **Layer 2: Vision Tools (Implemented)** - A Dockerized geospatial engine that handles heavy GIS operations (CRS reprojection, raster masking, tensor generation) without C++ dependency conflicts (GDAL/PROJ).
+- **Layer 1: FastAPI Orchestration Gateway (Implemented)** 
+Fully decoupled microservice architecture handling HTTP requests.
+Pydantic validation for incoming Agentic payloads (farm IDs, raster paths).
+Dynamic directory routing for localized prediction outputs, ensuring full traceability for downstream LLM agents.
+- **Layer 2: Vision Engine (U-Net MLOps) (Implemented)** 
+Custom-trained U-Net for semantic segmentation of active agricultural pivots.
+Addressed severe Class Imbalance using Smart Sampling and Custom Loss Functions (Weighted Sparse Categorical Crossentropy).
+Implemented real-time Synchronized Data Augmentation (NumPy) to break spatial memory and prevent overfitting.
+Full-scene inference capabilities using Tiling, Padding, and Stitching matrix operations.
 - **Layer 3: The Brain (Roadmap)** - An LLM orchestrator (LangChain/LlamaIndex) utilizing Tool Calling to fetch data autonomously.
 - **Layer 4: Persistence (Roadmap)** - Hybrid memory using PostGIS (vector geometries) and ChromaDB (credit policy embeddings).
 
