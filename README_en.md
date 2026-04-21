@@ -7,11 +7,11 @@ Traditional AgTech workflows require manual intervention (QGIS, satellite imager
 
 ## 🏗️ Architecture Layers
 This system is designed in 4 distinct layers:
-- **Layer 1: FastAPI Orchestration Gateway (Implemented)** 
+- **Layer 1: FastAPI Orchestration Gateway (Implemented)** - 
 Fully decoupled microservice architecture handling HTTP requests.
 Pydantic validation for incoming Agentic payloads (farm IDs, raster paths).
 Dynamic directory routing for localized prediction outputs, ensuring full traceability for downstream LLM agents.
-- **Layer 2: Vision Engine (U-Net MLOps) (Implemented)** 
+- **Layer 2: Vision Engine (U-Net MLOps) (Implemented)** -  
 Custom-trained U-Net for semantic segmentation of active agricultural pivots.
 Addressed severe Class Imbalance using Smart Sampling and Custom Loss Functions (Weighted Sparse Categorical Crossentropy).
 Implemented real-time Synchronized Data Augmentation (NumPy) to break spatial memory and prevent overfitting.

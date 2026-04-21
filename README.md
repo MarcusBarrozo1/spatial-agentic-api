@@ -9,11 +9,11 @@ Os fluxos de trabalho tradicionais de AgTech exigem intervenção manual (QGIS, 
 
 ## 🏗️ Camadas de Arquitetura
 Este sistema é projetado em 4 camadas distintas:
-- **Camada 1: Gateway de Orquestração (FastAPI) (Implementada)** 
+- **Camada 1: Gateway de Orquestração (FastAPI) (Implementada)** - 
 Arquitetura de microsserviço desacoplada para gerenciamento de requisições HTTP.
 Validação via Pydantic para os payloads enviados pelo Agente LLM.
 Roteamento dinâmico de diretórios, garantindo rastreabilidade exata dos arquivos de saída para o Cérebro LangChain.
-- **Camada 2: Motor de Visão Computacional (Implementadas)** 
+- **Camada 2: Motor de Visão Computacional (Implementadas)** - 
 U-Net customizada para segmentação semântica de pivôs agrícolas com cultura ativa (filtro de clorofila).
 Resolução de Desbalanceamento de Classes via Smart Sampling e Função de Perda Customizada (Pesos por pixel).
 Data Augmentation sincronizado e dinâmico para evitar overfitting espacial.
