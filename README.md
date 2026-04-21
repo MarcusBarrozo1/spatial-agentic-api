@@ -18,7 +18,7 @@ U-Net customizada para segmentação semântica de pivôs agrícolas com cultura
 Resolução de Desbalanceamento de Classes via Smart Sampling e Função de Perda Customizada (Pesos por pixel).
 Data Augmentation sincronizado e dinâmico para evitar overfitting espacial.
 Inferência em cenas completas (Full-Scene) aplicando rotinas matriciais de Fatiamento (Tiling) e Costura (Stitching).
-- **Camada 3: O Cérebro (Plano)** - Um orquestrador LLM (LangChain/LlamaIndex) utilizando Chamada de Ferramenta para buscar dados autonomamente.
+- **Camada 3: O Cérebro (Implementado)** - Um orquestrador LLM (LangChain/LlamaIndex) utilizando Chamada de Ferramenta para buscar dados autonomamente.
 - **Camada 4: Persistência (Plano)** - Memória híbrida usando PostGIS (geometrias vetoriais) e ChromaDB (embeddings de política de crédito).
 
 ## 🚀 Recursos Atuais do MVP
@@ -36,16 +36,24 @@ Inferência em cenas completas (Full-Scene) aplicando rotinas matriciais de Fati
 **Geoespacial e ML:** Rasterio, GeoPandas, NumPy
 **Machine Learning:** TensorFlow, Keras, NumPy  
 **DevOps:** Docker
+**Agente:** LangChain / LangGraph
 
-## ⚙️ Como Executar Localmente
+## ⚙️ Inicialização e Execução
 
-### 1. Construir o Container MLOps
+### 1. Requisitos do ambiente
+Certifique-se de que nenhum outro software (como o QGIS) esteja utilizando os arquivos de saída na pasta `/predictions` para evitar erros de `Permission Denied`.
+
+### 2. Subir o Serviço (Docker Compose)
 ```bash
-docker build -t spatial-agent-api .
+# Constrói e inicia a API de Visão
+docker-compose up --build
 ```
-
-### 2. Executar o Servidor
+### 3. Orquestração do Agente
 ```bash
-docker run -p 8000:8000 spatial-agent-api
+python service/agent.py
 ```
-#### Acesse a documentação interativa da API em http://localhost:8000/docs.
+## 📊 Resultados de Referência
+O modelo atual, após retreinamento e correção de pesos, apresenta os seguintes indicadores:
+- Target: Segmentação de talhões.
+- Métrica Alvo: NDVI Médio de ~0.58 (Cultura em estágio vegetativo ativo).
+- Estabilidade: 100% de sucesso na desserialização do modelo dentro do container Linux.

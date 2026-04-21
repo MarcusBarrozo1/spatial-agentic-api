@@ -16,7 +16,7 @@ Custom-trained U-Net for semantic segmentation of active agricultural pivots.
 Addressed severe Class Imbalance using Smart Sampling and Custom Loss Functions (Weighted Sparse Categorical Crossentropy).
 Implemented real-time Synchronized Data Augmentation (NumPy) to break spatial memory and prevent overfitting.
 Full-scene inference capabilities using Tiling, Padding, and Stitching matrix operations.
-- **Layer 3: The Brain (Roadmap)** - An LLM orchestrator (LangChain/LlamaIndex) utilizing Tool Calling to fetch data autonomously.
+- **Layer 3: The Brain (Implemented)** - An LLM orchestrator (LangChain/LlamaIndex) utilizing Tool Calling to fetch data autonomously.
 - **Layer 4: Persistence (Roadmap)** - Hybrid memory using PostGIS (vector geometries) and ChromaDB (credit policy embeddings).
 
 ## 🚀 Current MVP Features
@@ -34,18 +34,24 @@ Full-scene inference capabilities using Tiling, Padding, and Stitching matrix op
 **Geospatial & ML:** Rasterio, GeoPandas, NumPy
 **Machine Learning:** TensorFlow, Keras, NumPy    
 **DevOps:** Docker
+**Agent:** LangChain / LangGraph
 
-## ⚙️ How to Run Locally
+## ⚙️ Initialization and Execution
 
-### 1. Build the MLOps Container
+### 1. Requisitos do ambiente
+Be sure that any other software (like QGIS) is open and/or utilizing the output files in the `/predictions` folder to avoid `Permission Denied` errors.
+
+### 2. Docker Compose
 ```bash
-docker build -t spatial-agent-api .
+# Build and Initialize the Vision API
+docker-compose up --build
 ```
-
-### 2. Run the Server
+### 3. Agent Orchestration
 ```bash
-docker run -p 8000:8000 spatial-agent-api
+python service/agent.py
 ```
-#### Access the interactive API documentation at http://localhost:8000/docs.
-
-
+## 📊 Reference Results
+The actual model, after the training and weights correction, presents the following indicators:
+- Target: Crop areas segmentation.
+- Target Metrics: Mean NDVI of ~0.58 (Crop in an active vegetative stage).
+- Stability: 100% of success in model deserialization inside Linux container.
