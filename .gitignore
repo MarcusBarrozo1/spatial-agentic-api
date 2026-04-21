@@ -1,4 +1,6 @@
-*.xml
-
+.env
 __pycache__/
-.venv/
+*.pyc
+.ipynb_checkpoints/
+predictions/*
+!predictions/.gitkeep

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  spatial-vision-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./predictions:/app/predictions
+      - ./saved_models:/app/saved_models
+      - ./sample_data:/app/sample_data
+    env_file:
+      - .env
