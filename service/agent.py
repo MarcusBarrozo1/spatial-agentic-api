@@ -8,7 +8,12 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 
-# Importamos a ferramenta que criamos no passo anterior
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 from service.agent_tools import run_vision_segmentation
 
 load_dotenv()
