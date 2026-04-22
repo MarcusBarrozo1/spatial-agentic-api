@@ -1,59 +1,94 @@
 *Read this in [English](README_en.md).*
 
-# Spatial Agentic RAG: Visão Computacional Aplicada à Análise de Risco
-
-Um pipeline de orquestração de nível empresarial projetado para automatizar a análise de risco de crédito agrícola conectando Large Language Models (LLMs) com Visão Computacional Geoespacial.
+# 🛰️ Spatial Agentic RAG: Automação Geoespacial e Análise de Risco
+Um pipeline de orquestração de microsserviço multiagente (Agentic AI) projetado para automatizar a análise de risco de crédito agrícola, conectando Large Language Models (LLMs) de inferência ultrarrápida com Visão Computacional Geoespacial.
 
 ## 🎯 A Visão
-Os fluxos de trabalho tradicionais de AgTech exigem intervenção manual (QGIS, download de imagens de satélite e inspeções visuais). Este projeto implementa um **Agentic Workflow**, onde um LLM atua como orquestrador, acionando autonomamente pipelines de Visão Computacional Dockerizados (Rasterio/NumPy) para segmentar parcelas agrícolas, calcular a saúde vegetativa (NDVI) e fazer referência cruzada a bases de conhecimento espaciais (RAG Empresarial).
+Os fluxos de trabalho tradicionais em AgTech exigem intervenção manual pesada (QGIS, download de imagens de satélite e inspeções visuais). Este projeto implementa um Agentic Workflow, onde um LLM atua como orquestrador, raciocinando sobre as demandas do usuário e acionando autonomamente pipelines de Visão Computacional Dockerizados. O sistema segmenta parcelas agrícolas, identifica infraestruturas ativas, calcula a saúde vegetativa (NDVI) e emite laudos técnicos, eliminando o gargalo operacional.
 
-## 🏗️ Camadas de Arquitetura
-Este sistema é projetado em 4 camadas distintas:
-- **Camada 1: Gateway de Orquestração (FastAPI) (Implementada)** - 
-Arquitetura de microsserviço desacoplada para gerenciamento de requisições HTTP.
-Validação via Pydantic para os payloads enviados pelo Agente LLM.
-Roteamento dinâmico de diretórios, garantindo rastreabilidade exata dos arquivos de saída para o Cérebro LangChain.
-- **Camada 2: Motor de Visão Computacional (Implementadas)** - 
-U-Net customizada para segmentação semântica de pivôs agrícolas com cultura ativa (filtro de clorofila).
-Resolução de Desbalanceamento de Classes via Smart Sampling e Função de Perda Customizada (Pesos por pixel).
-Data Augmentation sincronizado e dinâmico para evitar overfitting espacial.
-Inferência em cenas completas (Full-Scene) aplicando rotinas matriciais de Fatiamento (Tiling) e Costura (Stitching).
-- **Camada 3: O Cérebro (Implementado)** - Um orquestrador LLM (LangChain/LlamaIndex) utilizando Chamada de Ferramenta para buscar dados autonomamente.
-- **Camada 4: Persistência (Plano)** - Memória híbrida usando PostGIS (geometrias vetoriais) e ChromaDB (embeddings de política de crédito).
+## 🏗️ Camadas de Arquitetura (Microservices)
+Este sistema foi desenhado com foco em escalabilidade, isolamento de responsabilidades e gerenciamento de Estado (StateGraph), dividido em 4 camadas estruturais:
 
-## 🚀 Recursos Atuais do MVP
-- [x] **Ingestão de Dados Geoespaciais:** Lê dados vetoriais (`.shp`, `.geojson`) e raster (`.tif`) de forma integrada.
-- [x] **Alinhamento CRS em Tempo Real:** Resolve matematicamente conflitos de sistema de coordenadas na memória.
-- [x] **Multi-Band Spatial ETL:** Ingestão e empilhamento (*stacking*) de múltiplas bandas espectrais do Sentinel-2 (ex: B2, B3, B4, B8) para análise espectral profunda.
-- [x] **Geração de Ground Truth:** Automação da conversão de polígonos (Shapefiles) em máscaras binárias georreferenciadas (`rasterize`).
-- [x] **Extração de Tensores:** Corta, mascara e fatia imagens de satélite em tensores sincronizados `(256, 256, Canais)` e `(256, 256, 1)`, prontos para ingestão.
-- [x] **Modelagem Deep Learning (U-Net):** Arquitetura semântica personalizada com *Bottleneck*, *Upsampling* (`Conv2DTranspose`) e *Skip Connections* para segmentação de precisão.
-- [x] **Orquestração MLOps:** Ciclo de treino automatizado com *EarlyStopping* e salvaguarda de *Model Checkpoints* (`.keras`).
-- [x] **Agent-Ready API:** Endpoints FastAPI com esquemas Pydantic, isolados em ambiente Docker (`python:3.11-slim`).
+🟩 **Camada 1: Gateway de Orquestração (FastAPI)** - [Em Produção]
+Atua como o servidor RESTFUL que encapsula o motor de inferência.
 
-## 🛠️ Pilha Tecnológica
-**Backend:** Python 3.11, FastAPI, Uvicorn, Pydantic  
-**Geoespacial e ML:** Rasterio, GeoPandas, NumPy
-**Machine Learning:** TensorFlow, Keras, NumPy  
-**DevOps:** Docker
-**Agente:** LangChain / LangGraph
+Desacoplamento: Isola o processamento pesado de tensores da interface de comunicação do Agente.
+
+Validação Estrita: Utiliza Pydantic para validar os payloads geográficos enviados pelo LLM (farm_id, raster_bands).
+
+Rastreabilidade Dinâmica: Roteamento autônomo de diretórios, garantindo que os GeoTIFFs resultantes sejam salvos e mapeados dinamicamente para consumo downstream.
+
+Virtualização: Totalmente empacotado em Docker (python:3.11-slim), garantindo agnosticidade de hardware e facilidade de deploy.
+
+🟦 **Camada 2: Motor de Visão Computacional (U-Net MLOps)** - [Em Produção]
+O núcleo matemático do projeto. Uma rede neural convolucional U-Net treinada do zero para Segmentação Semântica de culturas irrigadas usando bandas do Sentinel-2 (B2, B3, B4, B8).
+
+Smart Sampling & Class Imbalance: Implementação de extratores personalizados que equilibram dinamicamente patches positivos (pivôs) e negativos (background), prevenindo viés estatístico de fundo.
+
+Custom Loss Function: Uso de Weighted Sparse Categorical Crossentropy computada pixel a pixel, penalizando severamente erros nas classes minoritárias.
+
+Synchronized Data Augmentation: Aumento de dados matriciais (X e Y) em tempo real via NumPy, quebrando a "memória espacial" do modelo para prevenir Overfitting.
+
+Full-Scene Inference Engine: Pipeline nativo (inference.py) de fatiamento de imagens gigantes (Padding -> Tiling) e reconstrução matricial (Stitching -> Cropping) para predição de cenas completas em segundos.
+
+🟪 **Camada 3: Cérebro Agentic (LangGraph & Groq)** - [Em Produção]
+O orquestrador inteligente que toma decisões com base no prompt do usuário.
+
+StateGraph (Máquina de Estado): Fluxo de roteamento não-linear usando langgraph, permitindo que o modelo decida de forma autônoma quando invocar ferramentas externas (Tool Calling).
+
+Tool Node (agent_tools.py): Ferramentas autônomas que disparam requisições POST para a Camada 1 (Docker), interpretam os resultados e geram a extração de dados brutos.
+
+LLM Core (Groq/Llama 3): Utilização do modelo llama-3.3-70b-versatile via Groq API, entregando excepcional capacidade de raciocínio lógico (Function Calling) com latência de resposta próxima a zero.
+
+🟨 **Camada 4: Persistência (RAG Empresarial)** - [Roadmap]
+Memória Híbrida: Planejamento para integração com PostGIS (geometrias vetoriais históricas) e ChromaDB (embeddings de políticas de crédito agrícola) para contexto em tempo real.
+
+## 🛠️ Destaques de Engenharia & MLOps
+Correção de Ruído de Rótulo (Label Noise): Durante as auditorias, o modelo detectou o padrão de pivôs sem cultura ativa (NDVI ~0.08). O Ground Truth foi recalibrado cirurgicamente, comprovando que a arquitetura aprende assinaturas de clorofila ativa (NDVI > 0.5) e não apenas formas geométricas, garantindo análise de risco real.
+
+Multi-Band Spatial ETL: Ingestão e empilhamento (stacking) de múltiplas bandas espectrais perfeitamente alinhadas espacialmente na memória (Rasterio/NumPy).
+
+Supressão de Features vs. Eficiência: Análise documentada sobre a alocação de pesos neurais em geometrias de alta distinção (círculos) em detrimento de polígonos irregulares em datasets reduzidos.
 
 ## ⚙️ Inicialização e Execução
-
 ### 1. Requisitos do ambiente
-Certifique-se de que nenhum outro software (como o QGIS) esteja utilizando os arquivos de saída na pasta `/predictions` para evitar erros de `Permission Denied`.
+- Certifique-se de que as portas locais (ex: 8000) não estejam em uso.
 
-### 2. Subir o Serviço (Docker Compose)
+- Softwares GIS (como o QGIS) não devem estar travando os arquivos na pasta `/predictions` para evitar erros de `Permission Denied` no container.
+
+### 2. Subir o Serviço de Visão (Docker Compose)
+Inicialize as Camadas 1 e 2 (API + Modelo U-Net):
+
 ```bash
-# Constrói e inicia a API de Visão
+# Constrói e inicia a API de Visão de forma isolada
 docker-compose up --build
 ```
+A FastAPI estará ouvindo requisições na porta local.
+
 ### 3. Orquestração do Agente
+Em um terminal separado (ambiente virtual local), configure as chaves e inicie o Cérebro:
+
 ```bash
-python service/agent.py
+# Instale as dependências do agente
+pip install -r requirements.txt
+
+# Configure a chave de acesso da Groq
+export GROQ_API_KEY="sua_chave_groq_aqui"
+
+# Inicie o Assistente Geoespacial
+python agent.py
 ```
-## 📊 Resultados de Referência
-O modelo atual, após retreinamento e correção de pesos, apresenta os seguintes indicadores:
-- Target: Segmentação de talhões.
-- Métrica Alvo: NDVI Médio de ~0.58 (Cultura em estágio vegetativo ativo).
-- Estabilidade: 100% de sucesso na desserialização do modelo dentro do container Linux.
+
+## 📊 Resultados de Referência (V1)
+- Tempo de Inferência (Full-Scene): ~2.4s por cena completa de 1334x1746 px no pipeline de fatiamento.
+
+- Alvo de Predição: Culturas em estágio vegetativo.
+
+- Métrica de Validação: NDVI Médio detectado de ~0.58 nas áreas previstas (sucesso na filtragem de solo exposto).
+
+- Estabilidade: 100% de sucesso no despache assíncrono via API e serialização/desserialização do `.keras` dentro do container Linux.
+
+## 🗺️ Próximos Passos (Roadmap)
+[ ] Integração Sentinel Hub API: Permitir que o Agente faça o download automático de imagens baseando-se em requisições de coordenadas (Lat/Lon) enviadas pelo usuário, eliminando a dependência de arquivos de amostra locais.
+
+[ ] Análise de Séries Temporais: Orquestração de múltiplos frames temporais para detecção de anomalias fenológicas no ciclo da safra.
